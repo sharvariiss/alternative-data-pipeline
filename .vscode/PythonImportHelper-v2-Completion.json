@@ -1,0 +1,132 @@
+[
+    {
+        "label": "re",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "re",
+        "description": "re",
+        "detail": "re",
+        "documentation": {}
+    },
+    {
+        "label": "pandas",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "pandas",
+        "description": "pandas",
+        "detail": "pandas",
+        "documentation": {}
+    },
+    {
+        "label": "Path",
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "isExtraImport": true,
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
+        "label": "Path",
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "isExtraImport": true,
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
+        "label": "load_raw_csv",
+        "importPath": "src.ingest",
+        "description": "src.ingest",
+        "isExtraImport": true,
+        "detail": "src.ingest",
+        "documentation": {}
+    },
+    {
+        "label": "clean_dataframe",
+        "importPath": "src.clean",
+        "description": "src.clean",
+        "isExtraImport": true,
+        "detail": "src.clean",
+        "documentation": {}
+    },
+    {
+        "label": "validate",
+        "importPath": "src.validate",
+        "description": "src.validate",
+        "isExtraImport": true,
+        "detail": "src.validate",
+        "documentation": {}
+    },
+    {
+        "label": "standardize_columns",
+        "kind": 2,
+        "importPath": "src.clean",
+        "description": "src.clean",
+        "peekOfCode": "def standardize_columns(df: pd.DataFrame) -> pd.DataFrame:\n    df = df.copy()\n    df.columns = [re.sub(r\"\\s+\", \"_\", c.strip().lower()) for c in df.columns]\n    return df\ndef clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:\n    df = standardize_columns(df)\n    # Drop exact duplicates\n    df = df.drop_duplicates()\n    # Trim strings\n    for col in df.select_dtypes(include=\"object\").columns:",
+        "detail": "src.clean",
+        "documentation": {}
+    },
+    {
+        "label": "clean_dataframe",
+        "kind": 2,
+        "importPath": "src.clean",
+        "description": "src.clean",
+        "peekOfCode": "def clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:\n    df = standardize_columns(df)\n    # Drop exact duplicates\n    df = df.drop_duplicates()\n    # Trim strings\n    for col in df.select_dtypes(include=\"object\").columns:\n        df[col] = df[col].astype(str).str.strip()\n    # Coerce some common numeric fields if present\n    for num_col in [\"funding_total_usd\", \"funding_rounds\", \"founded_year\"]:\n        if num_col in df.columns:",
+        "detail": "src.clean",
+        "documentation": {}
+    },
+    {
+        "label": "load_raw_csv",
+        "kind": 2,
+        "importPath": "src.ingest",
+        "description": "src.ingest",
+        "peekOfCode": "def load_raw_csv(path: Path = RAW_PATH) -> pd.DataFrame:\n    if not path.exists():\n        raise FileNotFoundError(f\"Raw file not found: {path}\")\n    # Robust encoding handling for Kaggle/Windows exports\n    encodings = [\"utf-8\", \"utf-8-sig\", \"cp1252\", \"latin1\"]\n    last_err = None\n    for enc in encodings:\n        try:\n            df = pd.read_csv(path, encoding=enc, low_memory=False)\n            return df",
+        "detail": "src.ingest",
+        "documentation": {}
+    },
+    {
+        "label": "RAW_PATH",
+        "kind": 5,
+        "importPath": "src.ingest",
+        "description": "src.ingest",
+        "peekOfCode": "RAW_PATH = Path(\"data/raw/startup_investments.csv\")\ndef load_raw_csv(path: Path = RAW_PATH) -> pd.DataFrame:\n    if not path.exists():\n        raise FileNotFoundError(f\"Raw file not found: {path}\")\n    # Robust encoding handling for Kaggle/Windows exports\n    encodings = [\"utf-8\", \"utf-8-sig\", \"cp1252\", \"latin1\"]\n    last_err = None\n    for enc in encodings:\n        try:\n            df = pd.read_csv(path, encoding=enc, low_memory=False)",
+        "detail": "src.ingest",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "src.run_pipeline",
+        "description": "src.run_pipeline",
+        "peekOfCode": "def main():\n    df_raw = load_raw_csv()\n    raw_rows, raw_cols = df_raw.shape\n    df_clean = clean_dataframe(df_raw)\n    clean_rows, clean_cols = df_clean.shape\n    validation = validate(df_clean)\n    OUT_CLEAN.parent.mkdir(parents=True, exist_ok=True)\n    df_clean.to_csv(OUT_CLEAN, index=False)\n    REPORT_MD.parent.mkdir(parents=True, exist_ok=True)\n    missing_summary = (df_clean.isna().mean().sort_values(ascending=False).head(10) * 100).round(2)",
+        "detail": "src.run_pipeline",
+        "documentation": {}
+    },
+    {
+        "label": "OUT_CLEAN",
+        "kind": 5,
+        "importPath": "src.run_pipeline",
+        "description": "src.run_pipeline",
+        "peekOfCode": "OUT_CLEAN = Path(\"data/processed/clean.csv\")\nREPORT_MD = Path(\"reports/results.md\")\ndef main():\n    df_raw = load_raw_csv()\n    raw_rows, raw_cols = df_raw.shape\n    df_clean = clean_dataframe(df_raw)\n    clean_rows, clean_cols = df_clean.shape\n    validation = validate(df_clean)\n    OUT_CLEAN.parent.mkdir(parents=True, exist_ok=True)\n    df_clean.to_csv(OUT_CLEAN, index=False)",
+        "detail": "src.run_pipeline",
+        "documentation": {}
+    },
+    {
+        "label": "REPORT_MD",
+        "kind": 5,
+        "importPath": "src.run_pipeline",
+        "description": "src.run_pipeline",
+        "peekOfCode": "REPORT_MD = Path(\"reports/results.md\")\ndef main():\n    df_raw = load_raw_csv()\n    raw_rows, raw_cols = df_raw.shape\n    df_clean = clean_dataframe(df_raw)\n    clean_rows, clean_cols = df_clean.shape\n    validation = validate(df_clean)\n    OUT_CLEAN.parent.mkdir(parents=True, exist_ok=True)\n    df_clean.to_csv(OUT_CLEAN, index=False)\n    REPORT_MD.parent.mkdir(parents=True, exist_ok=True)",
+        "detail": "src.run_pipeline",
+        "documentation": {}
+    },
+    {
+        "label": "validate",
+        "kind": 2,
+        "importPath": "src.validate",
+        "description": "src.validate",
+        "peekOfCode": "def validate(df: pd.DataFrame) -> dict:\n    report = {\"passed\": True, \"checks\": []}\n    def check(name: str, condition: bool, detail: str = \"\"):\n        report[\"checks\"].append({\"name\": name, \"passed\": bool(condition), \"detail\": detail})\n        if not condition:\n            report[\"passed\"] = False\n    # Basic checks\n    check(\"non_empty_dataset\", len(df) > 0, f\"rows={len(df)}\")\n    # Column checks (common Crunchbase-like columns)\n    required_any = [\"name\", \"market\", \"category_list\", \"status\"]",
+        "detail": "src.validate",
+        "documentation": {}
+    }
+]
